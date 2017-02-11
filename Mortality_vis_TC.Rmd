@@ -1,0 +1,102 @@
+---
+title: "South African Causes of Death, 2012"
+resource_files:
+- data.rds
+runtime: shiny
+output: html_document
+---
+
+
+```{r, echo=FALSE}
+library(tibble)
+mydata<-readRDS("data.rds")
+library(ggplot2)
+library(scales)
+inputPanel(
+  
+  selectInput("gender", label = "Sex:",
+  choices = c("male", "female", "unspecified", "any"), selected = "any"),
+  
+    selectInput("nat_cause", label = "Cause of Death:",
+  choices = list("any",`Natural/Unnatural` =c("Natural Causes",  "unnatural causes"),  `detailed` =levels(as.factor(mydata$maincause))), selected = "any", multiple=TRUE),
+    
+   selectInput("province", label = "Province:",
+  choices=c("any", levels(as.factor(mydata$province)))  , selected = "any", multiple=TRUE),
+  
+   selectInput("byvar", label = "Show Distribution by:",
+               choices = list("sex"="sex", "cause of death"="maincause", "natural/unnatural"="natural", "province"="province", "smoking status"="smoke"), selected = "sex"),
+  
+sliderInput("max_age", "Age Range:", 0, 100, c(1,100)),
+      checkboxInput("exclude", label = "Exclude unspecified sex and province", value = TRUE),
+      checkboxInput("exclude_unknown", label = "Exclude unknown causes of death", value = FALSE)
+)
+
+renderPlot({
+  datanew<-mydata[which(mydata$sex==input$gender|mydata$all==input$gender),]
+  datanew<-datanew[which(datanew$natural==input$nat_cause|datanew$all==input$nat_cause|datanew$maincause==input$nat_cause),]
+  datanew<-datanew[which(datanew$province==input$province|datanew$all==input$province),]
+#include to subset by age for density plot# 
+  datanew<-datanew[which(datanew$age>input$max_age[1] & datanew$age<input$max_age[2] ),] 
+
+ if (input$exclude==TRUE)  datanew<-datanew[which(datanew$province!="Unknown" & datanew$sex!="unspecified"),]
+ if (input$exclude_unknown==TRUE)  datanew<-datanew[which(datanew$maincause!="Undiagnosed/unknown"),]
+
+  
+  attach(datanew)
+#plot(xlim=c(0,100), density(na.omit(datanew$age)))
+library(sm)
+layout(matrix(c(1,2,3),ncol=3), widths=c(12,3,1.2),heights=c(2.5,2.5,2.5))
+par(mai=c(0.9, 0, 0.5, 0))
+colfill<-c(2:(1+length(levels(as.factor(get(input$byvar))))))
+#ltype=c(2:(1+length(levels(as.factor(get(input$byvar))))))
+sm.density.compare(data=datanew,xlim=c(input$max_age[1],input$max_age[2]), age, group=as.factor(get(input$byvar)),lty = colfill, col=colfill)
+title(main ="Age Distribution")
+#  attach(datanew)
+
+#colfill<-c( 2:(2+length(levels(as.factor(get(input$byvar))))))
+#ltype=c(2:(2+length(levels(as.factor(get(input$byvar))))))
+#legend('topright', levels(as.factor(get(input$byvar))),lty = ltype, col=colfill,bty ="n")
+#lines(density(datanew$age))
+
+
+  attach(datanew)
+
+plot.new()
+colfill<-c( 2:(1+length(levels(as.factor(get(input$byvar))))))
+#ltype=c(2:(1+length(levels(as.factor(get(input$byvar))))))
+legend('center', levels(as.factor(get(input$byvar))),lty = colfill, col=colfill,bty ="n", cex=1.5)
+
+t<-as.matrix(table(as.factor(get(input$byvar))))
+barplot(-t, beside=FALSE, col=colfill,density=colfill,border=colfill,lty=colfill, yaxt='n', main="Proportion of \n Deaths")
+#######BAR graph
+ 
+#ggplot(datanew, aes(x=datanew$all, fill = as.factor(get(input$byvar) )),col=colfill) +
+#    geom_bar( )+ 
+   # theme(legend.title = element_blank()) +
+ #   ggtitle(paste("Cause of Death by Selected Variable") ) 
+
+
+})
+ 
+
+renderPlot({
+  datanew<-mydata[which(mydata$sex==input$gender|mydata$all==input$gender),]
+  datanew<-datanew[which(datanew$natural==input$nat_cause|datanew$all==input$nat_cause|datanew$maincause==input$nat_cause),]
+  datanew<-datanew[which(datanew$province==input$province|datanew$all==input$province),]
+  datanew<-datanew[which(datanew$age>input$max_age[1] & datanew$age<input$max_age[2] ),]
+#datanew<-ifelse(input$exclude==TRUE, datanew[which(datanew$province!="Unknown" & datanew$sex!="unspecified"),],datanew)
+ if (input$exclude==TRUE)  datanew<-datanew[which(datanew$province!="Unknown" & datanew$sex!="unspecified"),]
+  
+
+
+  ggplot(datanew, aes(x = factor(get(input$byvar)))) +
+    geom_bar(aes(fill = ifelse(get(input$byvar)!=maincause, maincause, sex)), position="fill" ) +
+  scale_y_continuous(labels=percent) +
+    theme(legend.title = element_blank()) +
+    ggtitle(ifelse(get(input$byvar)!=maincause,"Cause of Death by Selected Variable", "Cause of Death by gender") ) +
+    theme(plot.title = element_text(lineheight=.8, face="bold",hjust = 0.5))+
+    xlab(input$byvar) +ylab("percent")
+})
+
+
+```
