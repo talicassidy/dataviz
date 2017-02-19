@@ -2,7 +2,7 @@ directory<-"/Users/tali/Documents/mortality_visualisation/submission/"
 
 library(RCurl)
 myfile <- getURL('https://data.code4sa.org/api/views/di7x-4ek4/rows.csv?accessType=DOWNLOAD', ssl.verifyhost=FALSE, ssl.verifypeer=FALSE)
-mydat <- read.csv(textConnection(myfile), header=T)
+mydata <- read.csv(textConnection(myfile), header=T)
 
 
 ## data cleaning
