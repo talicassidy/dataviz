@@ -82,7 +82,7 @@ colfill<-c( 2:(1+length(levels(as.factor(get(input$byvar))))))
 #ltype=c(2:(1+length(levels(as.factor(get(input$byvar))))))
 t<-as.matrix(table(as.factor(get(input$byvar))))
 xx<-barplot(t, beside=TRUE, col=colfill,density=colfill,border=colfill,lty=colfill,yaxt='n', main="Absolute numbers")
-text(x = xx, y=t-10000, label = t)
+text(x = xx, y=0.9*t, label = t)
 
 })
  
@@ -105,4 +105,4 @@ renderPlot({
 ```
 
 
-[Code](https://github.com/talicassidy/dataviz) and [Data](https://open.africa/dataset/statistics-south-africa-causes-of-death/resource/97d00e9d-b614-47b6-8eb4-58c7cfe6567a)
+[Code](https://github.com/talicassidy/dataviz) [URL] (https://epifever.shinyapps.io/Mortality_2013_update/) and [Data](https://open.africa/dataset/statistics-south-africa-causes-of-death/resource/97d00e9d-b614-47b6-8eb4-58c7cfe6567a)
