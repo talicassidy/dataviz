@@ -6,7 +6,7 @@ runtime: shiny
 output: html_document
 ---
 
-
+## get data here: https://open.africa/dataset/statistics-south-africa-causes-of-death/resource/97d00e9d-b614-47b6-8eb4-58c7cfe6567a 
 ```{r, echo=FALSE}
 library(tibble)
 mydata<-readRDS("data.rds")
